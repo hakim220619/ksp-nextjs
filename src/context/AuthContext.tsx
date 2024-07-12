@@ -37,9 +37,6 @@ const AuthProvider = ({ children }: Props) => {
   const router = useRouter()
 
   useEffect(() => {
-    // localStorage.removeItem('userData')
-    // localStorage.removeItem('refreshToken')
-    // localStorage.removeItem('token')
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem('token')
       if (storedToken) {
@@ -53,6 +50,7 @@ const AuthProvider = ({ children }: Props) => {
           })
           .then(async response => {
             // console.log(response.data.userData)
+            console.log(response.data)
 
             setLoading(false)
             setUser({ ...response.data.userData })

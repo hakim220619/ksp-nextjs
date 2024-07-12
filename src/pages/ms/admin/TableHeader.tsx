@@ -42,7 +42,7 @@ const TableHeader = (props: TableHeaderProps) => {
           placeholder='Search Full Name'
           onChange={e => handleFilter(e.target.value)}
         />
-        <Link href='/ms/admin/AddUserDrawer' passHref>
+        <Link href='/ms/admin/AdminAddView' passHref>
           <Button onClick={toggle} variant='contained' sx={{ '& svg': { mr: 2 } }}>
             <Icon fontSize='1.125rem' icon='tabler:plus' />
             Add New User

@@ -11,7 +11,6 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Dashboards',
       icon: 'ion:home-outline',
-      // badgeContent: 'new',
       badgeColor: 'error',
       children: [
         {
