@@ -1,79 +1,23 @@
 // ** React Imports
-import { forwardRef, useState, ChangeEvent, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import CardHeader from '@mui/material/CardHeader'
-import IconButton from '@mui/material/IconButton'
 import CardContent from '@mui/material/CardContent'
-import InputAdornment from '@mui/material/InputAdornment'
 
 // ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
 
-// ** Third Party Imports
-import * as yup from 'yup'
 import toast from 'react-hot-toast'
-import { useForm, Controller } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
 
-// ** Icon Imports
-import Icon from 'src/@core/components/icon'
-import DatePicker from 'react-datepicker'
-import { DateType } from 'src/types/forms/reactDatepickerTypes'
-import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import MenuItem from '@mui/material/MenuItem'
 import { SelectChangeEvent } from '@mui/material/Select'
 import axiosConfig from '../../../configs/axiosConfig'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-
-interface State {
-  password: string
-  showPassword: boolean
-}
-
-interface CustomInputProps {
-  value: DateType
-  label: string
-  error: boolean
-  onChange: (event: ChangeEvent) => void
-}
-
-const CustomInput = forwardRef(({ ...props }: CustomInputProps, ref) => {
-  return <CustomTextField fullWidth inputRef={ref} {...props} sx={{ width: '100%' }} />
-})
-
-const showErrors = (field: string, valueLen: number, min: number) => {
-  if (valueLen === 0) {
-    return `${field} field is required`
-  } else if (valueLen > 0 && valueLen < min) {
-    return `${field} must be at least ${min} characters`
-  } else {
-    return ''
-  }
-}
-
-const schema = yup.object().shape({
-  email: yup.string().email().required(),
-
-  nik: yup
-    .string()
-    .min(3, obj => showErrors('nik', obj.value.length, obj.min))
-    .required(),
-  fullName: yup
-    .string()
-    .min(3, obj => showErrors('fullName', obj.value.length, obj.min))
-    .required(),
-  dob: yup.date().required(),
-  address: yup.string().required(),
-  phone_number: yup
-    .number()
-    .min(3, obj => showErrors('phone number', obj.value.length, obj.min))
-    .required()
-})
 
 const FormValidationSchema = () => {
   const [nik, setNik] = useState<string>('')
@@ -86,33 +30,8 @@ const FormValidationSchema = () => {
   const [setValRole, setValueRole] = useState<any[]>([])
   const router = useRouter()
   const { uid } = router.query
-  // console.log(uid)
-  // const [dataUid, setUid] = useState<any>(uid)
-  const [state, setState] = useState<State>({
-    password: '',
-    showPassword: false
-  })
-  const data = localStorage.getItem('userData') as string
-  const company = JSON.parse(data)
-
-  const defaultValues = {
-    nik: nik,
-    email: email,
-    fullName: fullName,
-    address: address,
-    phone_number: phone_number,
-    role: role
-  }
-
   useEffect(() => {
     const storedToken = window.localStorage.getItem('token')
-    const customConfig = {
-      uid,
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Bearer ' + storedToken
-      }
-    }
     axiosConfig
       .post(
         '/general/findUsersByUid',
@@ -143,40 +62,11 @@ const FormValidationSchema = () => {
         setValueRole(response.data)
       })
   }, [])
-
-  // ** Hook
-
-  const handleClickShowPassword = () => {
-    setState({ ...state, showPassword: !state.showPassword })
-  }
   const handlePlanChange = useCallback((e: SelectChangeEvent<unknown>) => {
     setRole(e.target.value as string)
   }, [])
 
-  const onSubmit = (data: any) => {
-    const dataAll = {
-      data: data,
-      role: role
-    }
-
-    const storedToken = window.localStorage.getItem('token')
-    axiosConfig
-      .post('/create-admin', dataAll, {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
-        }
-      })
-      .then(async response => {
-        console.log(response)
-        toast.success('Successfully Added!')
-        // router.push('/ms/admin')
-      })
-      .catch(() => {
-        toast.error("Failed This didn't work.")
-        console.log('gagal')
-      })
-  }
+  const onSubmit = (data: any) => {}
 
   return (
     <Card>

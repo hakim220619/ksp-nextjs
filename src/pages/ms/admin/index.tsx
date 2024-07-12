@@ -73,11 +73,9 @@ const userStatusObj: UserStatusType = {
 //   }
 // }
 
-const RowOptions = ({ uid }: { uid: String }) => {
+const RowOptions = ({ uid }: { uid: any }) => {
   // ** Hooks
   const router = useRouter()
-  // ** State
-  // const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const handleRowOptionsClick = () => {
     // setAnchorEl(event.currentTarget)
