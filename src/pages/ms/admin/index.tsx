@@ -21,7 +21,7 @@ import CustomChip from 'src/@core/components/mui/chip'
 import CustomTextField from 'src/@core/components/mui/text-field'
 
 // ** Actions Imports
-import { fetchData } from 'src/store/apps/admin'
+import { fetchData, deleteUser } from 'src/store/apps/admin'
 
 // ** Types Imports
 import { RootState, AppDispatch } from 'src/store'
@@ -31,6 +31,11 @@ import { UsersType } from 'src/types/apps/userTypes'
 // ** Custom Table Components Imports
 import TableHeader from 'src/pages/ms/admin/TableHeader'
 import { useRouter } from 'next/router'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import axiosConfig from '../../../configs/axiosConfig'
+
+const MySwal = withReactContent(Swal)
 
 interface UserStatusType {
   [key: string]: ThemeColor
@@ -50,10 +55,13 @@ interface CellType {
 // }
 
 const userStatusObj: UserStatusType = {
-  active: 'success',
+  Active: 'success',
+  Online: 'success',
   pending: 'warning',
   inactive: 'secondary',
-  Verification: 'warning'
+  Verification: 'warning',
+  Offline: 'warning',
+  Blocked: 'error'
 }
 
 // ** renders client column
@@ -76,6 +84,7 @@ const userStatusObj: UserStatusType = {
 const RowOptions = ({ uid }: { uid: any }) => {
   // ** Hooks
   const router = useRouter()
+  const dispatch = useDispatch<AppDispatch>()
 
   const handleRowOptionsClick = () => {
     // setAnchorEl(event.currentTarget)
@@ -85,10 +94,29 @@ const RowOptions = ({ uid }: { uid: any }) => {
     router.push('/ms/admin/' + uid + '')
   }
   const handleRowOptionsClose = () => {
+    const storedToken = window.localStorage.getItem('token')
+
     console.log(uid)
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(result => {
+      if (result.isConfirmed) {
+        dispatch(deleteUser(uid))
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Your file has been deleted.',
+          icon: 'success'
+        })
+      }
+    })
     // setAnchorEl(null)
   }
-
   const handleDelete = () => {
     handleRowOptionsClose()
   }

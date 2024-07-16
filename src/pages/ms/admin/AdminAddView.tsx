@@ -87,7 +87,7 @@ const FormValidationSchema = () => {
     showPassword: false
   })
   const data = localStorage.getItem('userData') as string
-  const company = JSON.parse(data)
+  const getDataLocal = JSON.parse(data)
 
   const defaultValues = {
     nik: '4234d23',
@@ -96,7 +96,8 @@ const FormValidationSchema = () => {
     password: '123123123',
     address: 'asdasdasds',
     phone_number: '34534534634565',
-    company_id: company.company_id,
+    company_id: getDataLocal.company_id,
+    created_by: getDataLocal.id,
     role: null,
     dob: null
   }
@@ -148,7 +149,6 @@ const FormValidationSchema = () => {
         }
       })
       .then(async response => {
-        console.log(response)
         toast.success('Successfully Added!')
         router.push('/ms/admin')
       })

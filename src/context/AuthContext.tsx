@@ -39,8 +39,9 @@ const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem('token')
-      if (storedToken) {
-        setLoading(true)
+      // console.log(storedToken)
+
+      if (storedToken != null) {
         await axiosConfig
           .get('/cheklogin', {
             headers: {
@@ -50,10 +51,11 @@ const AuthProvider = ({ children }: Props) => {
           })
           .then(async response => {
             // console.log(response.data.userData)
-            console.log(response.data)
-
+            // console.log(response)
+            // if (response.data.userData) {
             setLoading(false)
             setUser({ ...response.data.userData })
+            // }
           })
           .catch(() => {
             localStorage.removeItem('userData')
@@ -66,7 +68,14 @@ const AuthProvider = ({ children }: Props) => {
             }
           })
       } else {
+        localStorage.removeItem('userData')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('token')
+        setUser(null)
         setLoading(false)
+        if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
+          router.replace('/login')
+        }
       }
     }
 
