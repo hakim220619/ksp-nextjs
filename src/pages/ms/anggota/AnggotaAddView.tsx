@@ -81,11 +81,6 @@ const schema = yup.object().shape({
 })
 
 const FormValidationSchema = () => {
-  const [role, setRole] = useState<string>('')
-  const [setValRole, setValueRole] = useState<any[]>([])
-  const [company, setCompany] = useState<string>('')
-
-  const [setValCompany, setValueCompany] = useState<any[]>([])
   const router = useRouter()
   const [state, setState] = useState<State>({
     password: '',
@@ -98,38 +93,13 @@ const FormValidationSchema = () => {
     nik: '4234d23',
     email: 'asdasd@gmail.com',
     fullName: 'asdasd',
-    password: '123123123',
+    password: '12345678',
     address: 'asdasdasds',
     phone_number: '34534534634565',
-    company_id: '',
+    company_id: getDataLocal.company_id,
     created_by: getDataLocal.id,
-    role: null,
     dob: null
   }
-
-  useEffect(() => {
-    const storedToken = window.localStorage.getItem('token')
-    axiosConfig
-      .get('/general/getRole', {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
-        }
-      })
-      .then(response => {
-        setValueRole(response.data)
-      })
-    axiosConfig
-      .get('/general/getCompany', {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
-        }
-      })
-      .then(response => {
-        setValueCompany(response.data)
-      })
-  }, [])
 
   // ** Hook
   const {
@@ -145,23 +115,16 @@ const FormValidationSchema = () => {
   const handleClickShowPassword = () => {
     setState({ ...state, showPassword: !state.showPassword })
   }
-  const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setRole(e.target.value as string)
-  }, [])
-  const handleCompanyChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setCompany(e.target.value as string)
-  }, [])
 
   const onSubmit = (data: any) => {
     const dataAll = {
-      data: data,
-      role: role,
-      company_id: company
+      data: data
     }
+    console.log(dataAll)
 
     const storedToken = window.localStorage.getItem('token')
     axiosConfig
-      .post('/create-admin', dataAll, {
+      .post('/create-anggota', dataAll, {
         headers: {
           Accept: 'application/json',
           Authorization: 'Bearer ' + storedToken
@@ -169,7 +132,7 @@ const FormValidationSchema = () => {
       })
       .then(async response => {
         toast.success('Successfully Added!')
-        router.push('/ms/admin')
+        router.push('/ms/anggota')
       })
       .catch(() => {
         toast.error("Failed This didn't work.")
@@ -179,7 +142,7 @@ const FormValidationSchema = () => {
 
   return (
     <Card>
-      <CardHeader title='Added New Admin' />
+      <CardHeader title='Added New Anggota' />
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={5}>
@@ -323,58 +286,6 @@ const FormValidationSchema = () => {
                 )}
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                select
-                fullWidth
-                label='Role'
-                defaultValue='Select Role'
-                SelectProps={{
-                  value: role,
-                  displayEmpty: true,
-                  onChange: e => handleRoleChange(e)
-                }}
-                error={Boolean(errors.role)}
-                aria-describedby='validation-schema-role'
-                {...(errors.role && { helperText: errors.role.message })}
-              >
-                <MenuItem value='' disabled>
-                  Select Role
-                </MenuItem>
-
-                {setValRole.map((data, i) => (
-                  <MenuItem key={i} value={data.id}>
-                    {data.role_name}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </Grid>
-            <Grid item xs={6}>
-              <CustomTextField
-                select
-                fullWidth
-                label='Company'
-                defaultValue='Select Company'
-                SelectProps={{
-                  value: company,
-                  displayEmpty: true,
-                  onChange: e => handleCompanyChange(e)
-                }}
-                error={Boolean(errors.company_id)}
-                aria-describedby='validation-schema-company_id'
-                {...(errors.company_id && { helperText: errors.company_id.message })}
-              >
-                <MenuItem value='' disabled>
-                  Select Company
-                </MenuItem>
-
-                {setValCompany.map((data, i) => (
-                  <MenuItem key={i} value={data.id}>
-                    {data.company_name}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </Grid>
             <Grid item xs={12}>
               <Controller
                 name='address'
@@ -401,7 +312,7 @@ const FormValidationSchema = () => {
               <Box m={1} display='inline'>
                 {/* This adds a margin between the buttons */}
               </Box>
-              <Link href='/ms/admin' passHref>
+              <Link href='/ms/anggota' passHref>
                 <Button type='button' variant='contained' color='secondary'>
                   Back
                 </Button>

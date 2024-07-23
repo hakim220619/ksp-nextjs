@@ -48,7 +48,8 @@ const UserDropdown = (props: Props) => {
 
   // ** States
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-
+  const data = localStorage.getItem('userData') as string
+  const getDataLocal = JSON.parse(data)
   // ** Hooks
   const router = useRouter()
   const { logout } = useAuth()
@@ -127,8 +128,8 @@ const UserDropdown = (props: Props) => {
               <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>John Doe</Typography>
-              <Typography variant='body2'>Admin</Typography>
+              <Typography sx={{ fontWeight: 500 }}>{getDataLocal.fullName}</Typography>
+              <Typography variant='body2'>{getDataLocal.role}</Typography>
             </Box>
           </Box>
         </Box>

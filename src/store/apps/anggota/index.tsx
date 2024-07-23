@@ -4,18 +4,16 @@ import { Dispatch } from 'redux'
 import axiosConfig from 'src/configs/axiosConfig'
 
 interface DataParams {
-  q: string
-  role: string
-  status: string
   company: string
+  q: string
 }
 interface Redux {
   getState: any
   dispatch: Dispatch<any>
 }
 
-// ** Fetch Users
-export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: DataParams) => {
+// ** Fetch Anggota
+export const fetchData = createAsyncThunk('appAnggota/fetchData', async (params: DataParams) => {
   const storedToken = window.localStorage.getItem('token')
   const customConfig = {
     params,
@@ -24,15 +22,17 @@ export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: D
       Authorization: 'Bearer ' + storedToken
     }
   }
-
-  const response = await axiosConfig.get('/list-admin', customConfig)
+  const response = await axiosConfig.get('/list-anggota', customConfig)
+  console.log(response)
 
   return response.data
 })
 
 export const deleteUser = createAsyncThunk(
-  'appUsers/deleteUser',
+  'appAnggota/deleteUser',
   async (uid: number | string, { getState, dispatch }: Redux) => {
+    console.log(uid)
+
     const storedToken = window.localStorage.getItem('token')
     const dataAll = {
       data: uid
@@ -44,16 +44,16 @@ export const deleteUser = createAsyncThunk(
       }
     }
     const response = await axiosConfig.post('/delete-admin', dataAll, customConfig)
-    const { role, status, q, company } = getState().admin
+    const { company, q } = getState().admin
 
     // Memanggil fetchData untuk memperbarui data setelah penghapusan
-    dispatch(fetchData({ role, status, q, company }))
+    dispatch(fetchData({ company, q }))
 
     return response.data
   }
 )
-export const appUsersSlice = createSlice({
-  name: 'appUsers',
+export const appAnggotaSlice = createSlice({
+  name: 'appAnggota',
   initialState: {
     data: [],
     total: 1,
@@ -71,4 +71,4 @@ export const appUsersSlice = createSlice({
   }
 })
 
-export default appUsersSlice.reducer
+export default appAnggotaSlice.reducer

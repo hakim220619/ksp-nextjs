@@ -13,11 +13,11 @@ import Icon from 'src/@core/components/icon'
 import { useDispatch, useSelector } from 'react-redux'
 import CustomChip from 'src/@core/components/mui/chip'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import { fetchData, deleteUser } from 'src/store/apps/admin'
+import { fetchData, deleteUser } from 'src/store/apps/anggota'
 import { RootState, AppDispatch } from 'src/store'
 import { ThemeColor } from 'src/@core/layouts/types'
 import { UsersType } from 'src/types/apps/userTypes'
-import TableHeader from 'src/pages/ms/admin/TableHeader'
+import TableHeader from 'src/pages/ms/anggota/TableHeader'
 import { useRouter } from 'next/router'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
@@ -92,10 +92,9 @@ const RowOptions = ({ uid }: { uid: any }) => {
 }
 
 const columns: GridColDef[] = [
-  { flex: 0.25, minWidth: 100, field: 'no', headerName: 'NO' },
-  { flex: 0.25, minWidth: 280, field: 'company_name', headerName: 'COMPANY' },
-  { flex: 0.25, minWidth: 180, field: 'nik', headerName: 'NIK' },
-  { flex: 0.25, minWidth: 180, field: 'fullName', headerName: 'FULL NAME' },
+  { flex: 0.25, minWidth: 10, field: 'no', headerName: 'NO' },
+  { flex: 0.25, minWidth: 280, field: 'nik', headerName: 'NIK' },
+  { flex: 0.25, minWidth: 280, field: 'fullName', headerName: 'FULL NAME' },
   { flex: 0.15, field: 'email', minWidth: 260, headerName: 'EMAIL' },
   { flex: 0.15, field: 'role', minWidth: 170, headerName: 'ROLE' },
   { flex: 0.15, field: 'phone_number', minWidth: 170, headerName: 'PHONE' },
@@ -131,52 +130,32 @@ const UserList = () => {
   const [role, setRole] = useState<string>('')
   const [value, setValue] = useState<string>('')
   const [status, setStatus] = useState<string>('')
-  const data = localStorage.getItem('userData') as string
-  const getDataLocal = JSON.parse(data)
-  const [company, setCompany] = useState<any>(`${getDataLocal.company_id}`)
   const [addUserOpen, setAddUserOpen] = useState<boolean>(false)
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [loading, setLoading] = useState<boolean>(true)
-  const [setValcompany, setValueCompany] = useState<any[]>([])
+  const data = localStorage.getItem('userData') as string
+  const getDataLocal = JSON.parse(data)
+  const [company, setCompany] = useState<any>(`${getDataLocal.company_id}`)
+
+  //   setCompany(getDataLocal.company_id)
+  //   console.log(getDataLocal.company_id)
 
   const dispatch = useDispatch<AppDispatch>()
-  const store = useSelector((state: RootState) => state.admin)
-  useEffect(() => {
-    const storedToken = window.localStorage.getItem('token')
+  const store = useSelector((state: RootState) => state.anggota)
 
+  useEffect(() => {
     setLoading(true)
     dispatch(
       fetchData({
-        role,
-        status,
         company,
         q: value
       })
     ).finally(() => {
       setLoading(false)
     })
-    axiosConfig
-      .get('/general/getCompany', {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
-        }
-      })
-      .then(response => {
-        setValueCompany(response.data)
-      })
-  }, [dispatch, role, status, company, value])
+  }, [dispatch, role, status, value])
   const handleFilter = useCallback((val: string) => {
     setValue(val)
-  }, [])
-  const handleRoleChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setRole(e.target.value as string)
-  }, [])
-  const handleCompanyChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setCompany(e.target.value as string)
-  }, [])
-  const handleStatusChange = useCallback((e: SelectChangeEvent<unknown>) => {
-    setStatus(e.target.value as string)
   }, [])
   const toggleAddUserDrawer = () => setAddUserOpen(!addUserOpen)
 
@@ -185,103 +164,7 @@ const UserList = () => {
       <Grid item xs={12}></Grid>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Search Filters' />
-          {getDataLocal.role == 'Developer' ? (
-            <CardContent>
-              <Grid container spacing={12}>
-                <Grid item sm={4} xs={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    defaultValue='Select Role'
-                    SelectProps={{
-                      value: role,
-                      displayEmpty: true,
-                      onChange: e => handleRoleChange(e)
-                    }}
-                  >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='Admin'>Admin</MenuItem>
-                    <MenuItem value='Super Admin'>Super Admin</MenuItem>
-                  </CustomTextField>
-                </Grid>
-                <Grid item sm={4} xs={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    defaultValue='Select Status'
-                    SelectProps={{
-                      value: status,
-                      displayEmpty: true,
-                      onChange: e => handleStatusChange(e)
-                    }}
-                  >
-                    <MenuItem value=''>Select Status</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
-                    <MenuItem value='active'>Active</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
-                  </CustomTextField>
-                </Grid>
-                <Grid item sm={4} xs={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    defaultValue='Select Company'
-                    SelectProps={{
-                      value: company,
-                      displayEmpty: true,
-                      onChange: e => handleCompanyChange(e)
-                    }}
-                  >
-                    <MenuItem value='all'>Select Company</MenuItem>
-                    {setValcompany.map((data, i) => (
-                      <MenuItem key={i} value={data.id}>
-                        {data.company_name}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
-                </Grid>
-              </Grid>
-            </CardContent>
-          ) : (
-            <CardContent>
-              <Grid container spacing={12}>
-                <Grid item sm={6} xs={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    defaultValue='Select Role'
-                    SelectProps={{
-                      value: role,
-                      displayEmpty: true,
-                      onChange: e => handleRoleChange(e)
-                    }}
-                  >
-                    <MenuItem value=''>Select Role</MenuItem>
-                    <MenuItem value='Admin'>Admin</MenuItem>
-                    <MenuItem value='Super Admin'>Super Admin</MenuItem>
-                  </CustomTextField>
-                </Grid>
-                <Grid item sm={6} xs={12}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    defaultValue='Select Status'
-                    SelectProps={{
-                      value: status,
-                      displayEmpty: true,
-                      onChange: e => handleStatusChange(e)
-                    }}
-                  >
-                    <MenuItem value=''>Select Status</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
-                    <MenuItem value='active'>Active</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
-                  </CustomTextField>
-                </Grid>
-              </Grid>
-            </CardContent>
-          )}
+          <CardHeader title='Anggota' />
           <Divider sx={{ m: '0 !important' }} />
           <TableHeader value={value} handleFilter={handleFilter} toggle={toggleAddUserDrawer} />
           {loading ? (

@@ -9,6 +9,7 @@ import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
+import Box from '@mui/material/Box'
 
 // ** Custom Component Import
 import CustomTextField from 'src/@core/components/mui/text-field'
@@ -51,6 +52,8 @@ const FormValidationSchema = () => {
   const [state, setState] = useState<string>('')
   const [states, setStates] = useState<State[]>([])
   const [company_id, setCompanyId] = useState<string>('')
+  const [setValCompany, setValueCompany] = useState<any[]>([])
+
   const [updated_by, setUpdatedBy] = useState<string>()
   const router = useRouter()
   const { uid } = router.query
@@ -109,9 +112,22 @@ const FormValidationSchema = () => {
 
           setStates(response.data)
         })
+      axiosConfig
+        .get('/general/getCompany', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: 'Bearer ' + storedToken
+          }
+        })
+        .then(response => {
+          setValueCompany(response.data)
+        })
     }
   }, [uid])
 
+  const handleCompanyChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
+    setCompanyId(e.target.value as string)
+  }, [])
   const handleRoleChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
     setRole(e.target.value as string)
   }, [])
@@ -175,7 +191,7 @@ const FormValidationSchema = () => {
       state,
       updated_by
     }
-    console.log(data)
+    // console.log(data)
 
     if (storedToken) {
       axiosConfig
@@ -278,6 +294,18 @@ const FormValidationSchema = () => {
               </CustomTextField>
             </Grid>
             <Grid item xs={6}>
+              <CustomTextField select fullWidth label='Company' value={company_id} onChange={handleCompanyChange}>
+                <MenuItem value='' disabled>
+                  Select Company
+                </MenuItem>
+                {setValCompany.map(data => (
+                  <MenuItem key={data.id} value={data.id}>
+                    {data.company_name}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={6}>
               <CustomTextField
                 fullWidth
                 value={address}
@@ -290,6 +318,9 @@ const FormValidationSchema = () => {
               <Button type='submit' variant='contained'>
                 Save
               </Button>
+              <Box m={1} display='inline'>
+                {/* This adds a margin between the buttons */}
+              </Box>
               <Link href='/ms/admin' passHref>
                 <Button type='button' variant='contained' color='secondary'>
                   Back

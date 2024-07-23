@@ -3,10 +3,12 @@ import { configureStore } from '@reduxjs/toolkit'
 
 // ** Reducers
 import admin from 'src/store/apps/admin/index'
+import anggota from 'src/store/apps/anggota/index'
 
 export const store = configureStore({
   reducer: {
-    admin
+    admin,
+    anggota
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
