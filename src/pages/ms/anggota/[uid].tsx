@@ -21,47 +21,46 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 
 // ** Types
-interface Role {
-  id: string
-  role_name: string
+interface ReligionType {
+  religion_name: string // Adjust if there's a different property name
 }
 interface State {
   id: string
-  state_name: string
+  status_name: string
 }
-
-interface User {
-  nik: string
-  email: string
-  fullName: string
-  address: string
-  phone_number: string
-  dateOfBirth: string
-  role: string
+interface IdentityType {
+  id: string
+  idt_name: string
+}
+interface MaritalStatus {
+  id: string
+  ms_name: string
 }
 
 const FormValidationSchema = () => {
-  const userData = JSON.parse(localStorage.getItem('userData') as string)
+  const data = localStorage.getItem('userData') as string
+  const getDataCache = JSON.parse(data)
   const [nik, setNik] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [fullName, setFullName] = useState<string>('')
   const [address, setAddress] = useState<string>('')
   const [phoneNumber, setPhoneNumber] = useState<string>('')
   const [dateOfBirth, setDateOfBirth] = useState<string>('')
-  const [role, setRole] = useState<string>('')
-  const [roles, setRoles] = useState<Role[]>([])
-  const [state, setState] = useState<string>('')
-  const [states, setStates] = useState<State[]>([])
-  const [company_id, setCompanyId] = useState<string>(userData.company_id)
+  const [placeOfBirth, setPlaceOfBirth] = useState<string>('') // New state
+  const [gender, setGender] = useState<string>('') // New state
+  const [identityType, setIdentityType] = useState<string>('') // New state
+  const [noIdentity, setNoIdentity] = useState<string>('') // New state
+  const [maritalStatus, setMaritalStatus] = useState<string>('') // New state
+  const [status, setStatus] = useState<State[]>([])
+  const [statuses, setStatuses] = useState<State[]>([])
+  const [identityTypes, setIdentityTypes] = useState<IdentityType[]>([]) // New state
+  const [maritalStatusOptions, setMaritalStatusOptions] = useState<MaritalStatus[]>([]) // New state
+  const [company_id, setCompanyId] = useState<string>(getDataCache.company_id)
   const [setValCompany, setValueCompany] = useState<any[]>([])
-  const [setValRole, setValueRole] = useState<any[]>([])
 
   const [updated_by, setUpdatedBy] = useState<string>()
   const router = useRouter()
   const { uid } = router.query
-
-  const data = localStorage.getItem('userData') as string
-  const getDataCache = JSON.parse(data)
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem('token')
@@ -78,36 +77,35 @@ const FormValidationSchema = () => {
           }
         )
         .then(response => {
-          const { nik, email, fullName, address, phone_number, date, role, company_id, state } = response.data
+          const {
+            nik,
+            email,
+            fullName,
+            address,
+            phone_number,
+            date_of_birth,
+            place_of_birth,
+            gender,
+            identity_type,
+            no_identity,
+            marital_status,
+            company_id,
+            status
+          } = response.data
           setNik(nik)
           setEmail(email)
           setFullName(fullName)
           setAddress(address)
           setPhoneNumber(phone_number)
-          setDateOfBirth(date.slice(0, 10))
-          setRole(role)
+          setDateOfBirth(date_of_birth.slice(0, 10))
+          setPlaceOfBirth(place_of_birth)
+          setGender(gender)
+          setIdentityType(identity_type)
+          setNoIdentity(no_identity)
+          setMaritalStatus(marital_status)
           setCompanyId(company_id)
-          setState(state)
+          setStatus(status)
           setUpdatedBy(getDataCache.id)
-        })
-
-      const role_name = 'Developer'
-      axiosConfig
-        .post(
-          '/general/getRoleNoDeve', // Endpoint for fetching roles
-          { role_name }, // Include company_id in the request body
-          {
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${storedToken}`
-            }
-          }
-        )
-        .then(response => {
-          setValueRole(response.data) // Set roles data
-        })
-        .catch(error => {
-          console.error('Error fetching role data:', error)
         })
 
       axiosConfig
@@ -118,10 +116,9 @@ const FormValidationSchema = () => {
           }
         })
         .then(response => {
-          // console.log(response)
-
-          setStates(response.data)
+          setStatuses(response.data)
         })
+
       axiosConfig
         .post(
           '/general/getCompany',
@@ -139,17 +136,53 @@ const FormValidationSchema = () => {
         .catch(error => {
           console.error('Error fetching company data:', error)
         })
+
+      axiosConfig
+        .get('/get-identity-types', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        .then(response => {
+          setIdentityTypes(response.data)
+        })
+        .catch(() => {
+          console.error('Failed to fetch identity types')
+          toast.error('Failed to fetch identity types')
+        })
+
+      axiosConfig
+        .get('/general/getMaritalStatus', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        .then(response => {
+          setMaritalStatusOptions(response.data)
+        })
+        .catch(() => {
+          console.error('Failed to fetch marital status options')
+          toast.error('Failed to fetch marital status options')
+        })
     }
   }, [uid])
 
   const handleCompanyChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
     setCompanyId(e.target.value as string)
   }, [])
-  const handleRoleChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
-    setRole(e.target.value as string)
-  }, [])
   const handleStateChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
-    setState(e.target.value as string)
+    setStatus(e.target.value as any)
+  }, [])
+  const handleIdentityTypeChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
+    setIdentityType(e.target.value as string)
+  }, [])
+  const handleMaritalStatusChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
+    setMaritalStatus(e.target.value as string)
+  }, [])
+  const handleGenderChange = useCallback((e: React.ChangeEvent<{ value: unknown }>) => {
+    setGender(e.target.value as string)
   }, [])
 
   const validateForm = () => {
@@ -177,11 +210,27 @@ const FormValidationSchema = () => {
       toast.error('Date of Birth is required')
       return false
     }
-    if (!role) {
-      toast.error('Role is required')
+    if (!placeOfBirth) {
+      toast.error('Place of Birth is required')
       return false
     }
-    if (!state) {
+    if (!gender) {
+      toast.error('Gender is required')
+      return false
+    }
+    if (!identityType) {
+      toast.error('Identity Type is required')
+      return false
+    }
+    if (!noIdentity) {
+      toast.error('No Identity is required')
+      return false
+    }
+    if (!maritalStatus) {
+      toast.error('Marital Status is required')
+      return false
+    }
+    if (!status) {
       toast.error('State is required')
       return false
     }
@@ -203,17 +252,20 @@ const FormValidationSchema = () => {
       address,
       phone_number: phoneNumber,
       dateOfBirth,
-      role,
+      placeOfBirth,
+      gender,
+      identityType,
+      noIdentity,
+      maritalStatus,
       company_id,
-      state,
+      status,
       updated_by
     }
-    // console.log(data)
 
     if (storedToken) {
       axiosConfig
         .post(
-          '/update-admin',
+          '/update-anggota',
           { data },
           {
             headers: {
@@ -224,7 +276,7 @@ const FormValidationSchema = () => {
         )
         .then(() => {
           toast.success('Successfully Added!')
-          router.push('/ms/admin')
+          router.push('/ms/anggota')
         })
         .catch(() => {
           toast.error("Failed. This didn't work.")
@@ -234,7 +286,7 @@ const FormValidationSchema = () => {
 
   return (
     <Card>
-      <CardHeader title='Update Admin' />
+      <CardHeader title='Update Anggota' />
       <CardContent>
         <form onSubmit={onSubmit}>
           <Grid container spacing={5}>
@@ -245,6 +297,7 @@ const FormValidationSchema = () => {
                 onChange={e => setNik(e.target.value)}
                 label='Nik'
                 placeholder='Ksp635247813'
+                aria-readonly
               />
             </Grid>
             <Grid item xs={6}>
@@ -285,33 +338,92 @@ const FormValidationSchema = () => {
                 placeholder='6285***'
               />
             </Grid>
-
             <Grid item xs={6}>
-              <CustomTextField select fullWidth label='Role' value={role} onChange={handleRoleChange}>
+              <CustomTextField
+                fullWidth
+                value={placeOfBirth}
+                onChange={e => setPlaceOfBirth(e.target.value)}
+                label='Place of Birth'
+                placeholder='City, Country'
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField select fullWidth label='Gender' value={gender} onChange={handleGenderChange}>
                 <MenuItem value='' disabled>
-                  Select Role
+                  Select Gender
                 </MenuItem>
-                {setValRole.map((data, i) => (
-                  <MenuItem key={i} value={data.id}>
-                    {data.role_name}
+                <MenuItem value='Laki-Laki'>Laki-Laki</MenuItem>
+                <MenuItem value='Perempuan'>Perempuan</MenuItem>
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                select
+                fullWidth
+                label='Identity Type'
+                value={identityType}
+                onChange={handleIdentityTypeChange}
+              >
+                <MenuItem value='' disabled>
+                  Select Identity Type
+                </MenuItem>
+                {identityTypes.map(data => (
+                  <MenuItem key={data.idt_name} value={data.idt_name}>
+                    {data.idt_name}
                   </MenuItem>
                 ))}
               </CustomTextField>
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField select fullWidth label='State' value={state} onChange={handleStateChange}>
+              <CustomTextField
+                fullWidth
+                value={noIdentity}
+                onChange={e => setNoIdentity(e.target.value)}
+                label='No Identity'
+                placeholder='ID Number'
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField
+                select
+                fullWidth
+                label='Marital Status'
+                value={maritalStatus}
+                onChange={handleMaritalStatusChange}
+              >
+                <MenuItem value='' disabled>
+                  Select Marital Status
+                </MenuItem>
+                {maritalStatusOptions.map(data => (
+                  <MenuItem key={data.ms_name} value={data.ms_name}>
+                    {data.ms_name}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={6}>
+              <CustomTextField select fullWidth label='Status' value={status} onChange={handleStateChange}>
                 <MenuItem value='' disabled>
                   Select State
                 </MenuItem>
-                {states.map(data => (
-                  <MenuItem key={data.state_name} value={data.state_name}>
-                    {data.state_name}
+                {statuses.map(data => (
+                  <MenuItem key={data.status_name} value={data.status_name}>
+                    {data.status_name}
                   </MenuItem>
                 ))}
               </CustomTextField>
             </Grid>
             <Grid item xs={6}>
-              <CustomTextField select fullWidth label='Company' value={company_id} onChange={handleCompanyChange}>
+              <CustomTextField
+                select
+                fullWidth
+                label='Company'
+                value={company_id}
+                onChange={handleCompanyChange}
+                InputProps={{
+                  readOnly: company_id === '1' // Make it readOnly only if company_id is '1'
+                }}
+              >
                 <MenuItem value='' disabled>
                   Select Company
                 </MenuItem>
@@ -331,6 +443,7 @@ const FormValidationSchema = () => {
                 placeholder='Jl Hr Agung'
               />
             </Grid>
+
             <Grid item xs={12}>
               <Button type='submit' variant='contained'>
                 Save
@@ -338,7 +451,7 @@ const FormValidationSchema = () => {
               <Box m={1} display='inline'>
                 {/* This adds a margin between the buttons */}
               </Box>
-              <Link href='/ms/admin' passHref>
+              <Link href='/ms/anggota' passHref>
                 <Button type='button' variant='contained' color='secondary'>
                   Back
                 </Button>

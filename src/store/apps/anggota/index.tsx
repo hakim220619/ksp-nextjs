@@ -23,8 +23,6 @@ export const fetchData = createAsyncThunk('appAnggota/fetchData', async (params:
     }
   }
   const response = await axiosConfig.get('/list-anggota', customConfig)
-  console.log(response)
-
   return response.data
 })
 
@@ -44,10 +42,6 @@ export const deleteUser = createAsyncThunk(
       }
     }
     const response = await axiosConfig.post('/delete-admin', dataAll, customConfig)
-    const { company, q } = getState().admin
-
-    // Memanggil fetchData untuk memperbarui data setelah penghapusan
-    dispatch(fetchData({ company, q }))
 
     return response.data
   }

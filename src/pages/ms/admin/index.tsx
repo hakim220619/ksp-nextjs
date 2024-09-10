@@ -24,6 +24,7 @@ import withReactContent from 'sweetalert2-react-content'
 import axiosConfig from '../../../configs/axiosConfig'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Box } from '@mui/system'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 const MySwal = withReactContent(Swal)
 
 interface UserStatusType {
@@ -45,6 +46,13 @@ const userStatusObj: UserStatusType = {
 }
 
 const RowOptions = ({ uid }: { uid: any }) => {
+  const data = localStorage.getItem('userData') as string
+  const getDataLocal = JSON.parse(data)
+  const [open, setOpen] = useState(false)
+  const [role, setRole] = useState<string>('')
+  const [value, setValue] = useState<string>('')
+  const [status, setStatus] = useState<string>('')
+  const [company, setCompany] = useState<any>(`${getDataLocal.company_id}`)
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
 
@@ -52,29 +60,20 @@ const RowOptions = ({ uid }: { uid: any }) => {
   const handleRowEditedClick = () => {
     router.push('/ms/admin/' + uid)
   }
-  const handleRowOptionsClose = () => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then(result => {
-      if (result.isConfirmed) {
-        dispatch(deleteUser(uid))
-        Swal.fire({
-          title: 'Deleted!',
-          text: 'Your file has been deleted.',
-          icon: 'success'
-        })
-      }
-    })
+  const handleDelete = async () => {
+    try {
+      await dispatch(deleteUser(uid)).unwrap() // Wait for deleteUser to complete
+      await dispatch(fetchData({ role, status, company, q: value })) // Refresh data
+      setOpen(false) // Close the modal if everything is successful
+    } catch (error) {
+      console.error('Failed to delete user:', error)
+      // Optionally handle errors and show a message to the user
+    }
   }
-  const handleDelete = () => {
-    handleRowOptionsClose()
-  }
+
+  const handleClickOpenDelete = () => setOpen(true)
+
+  const handleClose = () => setOpen(false)
 
   return (
     <>
@@ -84,9 +83,30 @@ const RowOptions = ({ uid }: { uid: any }) => {
       <IconButton size='small' color='success' onClick={handleRowEditedClick}>
         <Icon icon='tabler:edit' />
       </IconButton>
-      <IconButton size='small' color='error' onClick={handleDelete}>
+      <IconButton size='small' color='error' onClick={handleClickOpenDelete}>
         <Icon icon='tabler:trash' />
       </IconButton>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to delete this user? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color='primary'>
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color='error'>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
@@ -102,7 +122,7 @@ const columns: GridColDef[] = [
   {
     flex: 0.1,
     minWidth: 180,
-    field: 'state',
+    field: 'status',
     headerName: 'STATUS',
     renderCell: ({ row }: CellType) => {
       return (
@@ -110,8 +130,8 @@ const columns: GridColDef[] = [
           rounded
           skin='light'
           size='small'
-          label={row.state}
-          color={userStatusObj[row.state]}
+          label={row.status}
+          color={userStatusObj[row.status]}
           sx={{ textTransform: 'capitalize' }}
         />
       )
@@ -138,9 +158,10 @@ const UserList = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [loading, setLoading] = useState<boolean>(true)
   const [setValcompany, setValueCompany] = useState<any[]>([])
-
+  const [statuses, setStatuses] = useState<any[]>([])
   const dispatch = useDispatch<AppDispatch>()
   const store = useSelector((state: RootState) => state.admin)
+
   useEffect(() => {
     const storedToken = window.localStorage.getItem('token')
 
@@ -155,15 +176,34 @@ const UserList = () => {
     ).finally(() => {
       setLoading(false)
     })
+    const userData = JSON.parse(localStorage.getItem('userData') as string)
+    const { company_id } = userData // Extract company_id
     axiosConfig
-      .get('/general/getCompany', {
+      .post(
+        '/general/getCompany',
+        { company_id }, // Send company_id in the request body
+        {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${storedToken}`
+          }
+        }
+      )
+      .then(response => {
+        setValueCompany(response.data)
+      })
+      .catch(error => {
+        console.error('Error fetching company data:', error)
+      })
+    axiosConfig
+      .get('/general/getStatus', {
         headers: {
           Accept: 'application/json',
           Authorization: 'Bearer ' + storedToken
         }
       })
       .then(response => {
-        setValueCompany(response.data)
+        setStatuses(response.data)
       })
   }, [dispatch, role, status, company, value])
   const handleFilter = useCallback((val: string) => {
@@ -216,10 +256,12 @@ const UserList = () => {
                       onChange: e => handleStatusChange(e)
                     }}
                   >
-                    <MenuItem value=''>Select Status</MenuItem>
-                    <MenuItem value='pending'>Pending</MenuItem>
-                    <MenuItem value='active'>Active</MenuItem>
-                    <MenuItem value='inactive'>Inactive</MenuItem>
+                    <MenuItem value=''>Select State</MenuItem>
+                    {statuses.map(data => (
+                      <MenuItem key={data.state_name} value={data.state_name}>
+                        {data.state_name}
+                      </MenuItem>
+                    ))}
                   </CustomTextField>
                 </Grid>
                 <Grid item sm={4} xs={12}>

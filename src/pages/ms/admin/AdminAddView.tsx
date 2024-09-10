@@ -109,25 +109,47 @@ const FormValidationSchema = () => {
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem('token')
+
+    // Get userData from local storage and extract company_id
+    const userData = JSON.parse(localStorage.getItem('userData') as string)
+    const { company_id } = userData // Extract company_id
+    // Get company_id from local storage or other source
+    const role_name = 'Developer'
     axiosConfig
-      .get('/general/getRole', {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
+      .post(
+        '/general/getRoleNoDeve', // Endpoint for fetching roles
+        { role_name }, // Include company_id in the request body
+        {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${storedToken}`
+          }
         }
-      })
+      )
       .then(response => {
-        setValueRole(response.data)
+        setValueRole(response.data) // Set roles data
       })
+      .catch(error => {
+        console.error('Error fetching role data:', error)
+      })
+
+    // Modify the getCompany request to include the company_id in the body
     axiosConfig
-      .get('/general/getCompany', {
-        headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + storedToken
+      .post(
+        '/general/getCompany',
+        { company_id }, // Send company_id in the request body
+        {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${storedToken}`
+          }
         }
-      })
+      )
       .then(response => {
         setValueCompany(response.data)
+      })
+      .catch(error => {
+        console.error('Error fetching company data:', error)
       })
   }, [])
 

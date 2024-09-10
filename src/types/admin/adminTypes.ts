@@ -6,7 +6,7 @@ export type UsersType = {
   uid: string
   nik: string
   nta: string
-  member_number: string
+  member_id: string
   fullName: string
   password: string
   date: string

@@ -50,7 +50,7 @@ const RowOptions = ({ uid }: { uid: any }) => {
 
   const handleRowOptionsClick = () => {}
   const handleRowEditedClick = () => {
-    router.push('/ms/admin/' + uid)
+    router.push('/ms/anggota/' + uid)
   }
   const handleRowOptionsClose = () => {
     Swal.fire({
@@ -101,7 +101,7 @@ const columns: GridColDef[] = [
   {
     flex: 0.1,
     minWidth: 180,
-    field: 'state',
+    field: 'status',
     headerName: 'STATUS',
     renderCell: ({ row }: CellType) => {
       return (
@@ -109,8 +109,8 @@ const columns: GridColDef[] = [
           rounded
           skin='light'
           size='small'
-          label={row.state}
-          color={userStatusObj[row.state]}
+          label={row.status}
+          color={userStatusObj[row.status]}
           sx={{ textTransform: 'capitalize' }}
         />
       )
@@ -136,9 +136,6 @@ const UserList = () => {
   const data = localStorage.getItem('userData') as string
   const getDataLocal = JSON.parse(data)
   const [company, setCompany] = useState<any>(`${getDataLocal.company_id}`)
-
-  //   setCompany(getDataLocal.company_id)
-  //   console.log(getDataLocal.company_id)
 
   const dispatch = useDispatch<AppDispatch>()
   const store = useSelector((state: RootState) => state.anggota)
