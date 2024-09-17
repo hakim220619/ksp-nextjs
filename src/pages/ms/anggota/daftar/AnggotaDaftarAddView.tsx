@@ -23,7 +23,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import DatePicker from 'react-datepicker'
 import { DateType } from 'src/types/forms/reactDatepickerTypes'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
-import axiosConfig from '../../../configs/axiosConfig'
+import axiosConfig from '../../../../configs/axiosConfig'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -42,6 +42,9 @@ interface ReligionType {
 }
 interface MsStatus {
   ms_name: string
+}
+interface Working {
+  work_name: string
 }
 
 interface CustomInputProps {
@@ -102,6 +105,7 @@ const FormValidationSchema = () => {
   const [identityTypes, setIdentityTypes] = useState<IdentityType[]>([])
   const [religion, setReligion] = useState<ReligionType[]>([])
   const [maritalStatusOptions, setMaritalStatusOptions] = useState<MsStatus[]>([])
+  const [Working, setWorking] = useState<Working[]>([])
   const data = localStorage.getItem('userData') as string
   const getDataLocal = JSON.parse(data)
 
@@ -120,7 +124,8 @@ const FormValidationSchema = () => {
     marital_status: '',
     identity_type: '',
     no_identity: '',
-    religion: ''
+    religion: '',
+    work: ''
   }
 
   // ** Hook
@@ -142,9 +147,11 @@ const FormValidationSchema = () => {
     const dataAll = {
       data: data
     }
+    console.log(dataAll)
+
     const storedToken = window.localStorage.getItem('token')
     axiosConfig
-      .post('/create-anggota', dataAll, {
+      .post('/create-anggota-verification', dataAll, {
         headers: {
           Accept: 'application/json',
           Authorization: 'Bearer ' + storedToken
@@ -152,7 +159,7 @@ const FormValidationSchema = () => {
       })
       .then(async response => {
         toast.success('Successfully Added!')
-        router.push('/ms/anggota')
+        router.push('/ms/anggota/daftar')
       })
       .catch(() => {
         toast.error("Failed This didn't work.")
@@ -175,7 +182,6 @@ const FormValidationSchema = () => {
           }
         })
         .then(response => {
-          console.log(response)
           setIdentityTypes(response.data) // Assuming the API returns an array of strings
         })
         .catch(() => {
@@ -190,7 +196,6 @@ const FormValidationSchema = () => {
           }
         })
         .then(response => {
-          console.log(response)
           setReligion(response.data) // Assuming the API returns an array of strings
         })
         .catch(() => {
@@ -205,8 +210,21 @@ const FormValidationSchema = () => {
           }
         })
         .then(response => {
-          console.log(response)
           setMaritalStatusOptions(response.data) // Assuming the API returns an array of status objects
+        })
+        .catch(() => {
+          console.error('Failed to fetch marital status options')
+          toast.error('Failed to fetch marital status options')
+        })
+      axiosConfig
+        .get('/general/getWorking', {
+          headers: {
+            Accept: 'application/json',
+            Authorization: 'Bearer ' + storedToken
+          }
+        })
+        .then(response => {
+          setWorking(response.data) // Assuming the API returns an array of status objects
         })
         .catch(() => {
           console.error('Failed to fetch marital status options')
@@ -529,6 +547,33 @@ const FormValidationSchema = () => {
             </Grid>
             <Grid item xs={12}>
               <Controller
+                name='work'
+                control={control}
+                defaultValue='' // Set default value to empty string
+                render={({ field }) => (
+                  <CustomTextField
+                    fullWidth
+                    select
+                    {...field}
+                    label='Working'
+                    value={field.value} // Use the field's value as-is
+                    error={Boolean(errors.work)}
+                    helperText={errors.work ? errors.work.message : ''}
+                  >
+                    <MenuItem value='' disabled>
+                      Select
+                    </MenuItem>
+                    {Working.map(type => (
+                      <MenuItem key={type.work_name} value={type.work_name}>
+                        {type.work_name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
                 name='address'
                 control={control}
                 rules={{ required: true }}
@@ -553,7 +598,7 @@ const FormValidationSchema = () => {
               <Box m={1} display='inline'>
                 {/* This adds a margin between the buttons */}
               </Box>
-              <Link href='/ms/anggota' passHref>
+              <Link href='/ms/anggota/daftar' passHref>
                 <Button type='button' variant='contained' color='secondary'>
                   Back
                 </Button>

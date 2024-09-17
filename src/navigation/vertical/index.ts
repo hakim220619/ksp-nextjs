@@ -87,7 +87,7 @@ const navigation = (): VerticalNavItemsType => {
         children: [
           {
             title: 'Calon Anggota',
-            path: 'admin/ms/nasabah/daftar'
+            path: '/ms/anggota/daftar'
           },
           {
             title: 'Kategori Anggota',

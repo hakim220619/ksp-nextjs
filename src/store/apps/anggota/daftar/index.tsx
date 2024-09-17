@@ -4,33 +4,33 @@ import { Dispatch } from 'redux'
 import axiosConfig from 'src/configs/axiosConfig'
 
 interface DataParams {
-  q: string
-  role: string
-  status: string
   company: string
+  q: string
 }
 interface Redux {
   getState: any
   dispatch: Dispatch<any>
 }
 
-// ** Fetch Users
-export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: DataParams) => {
-  const storedToken = window.localStorage.getItem('token')
-  const customConfig = {
-    params,
-    headers: {
-      Accept: 'application/json',
-      Authorization: 'Bearer ' + storedToken
+// ** Fetch Anggota
+export const fetchDataVerification = createAsyncThunk(
+  'appAnggotaVerification/fetchDataVerification',
+  async (params: DataParams) => {
+    const storedToken = window.localStorage.getItem('token')
+    const customConfig = {
+      params,
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + storedToken
+      }
     }
+    const response = await axiosConfig.get('/list-anggota-verification', customConfig)
+    return response.data
   }
-  const response = await axiosConfig.get('/list-admin', customConfig)
-
-  return response.data
-})
+)
 
 export const deleteUser = createAsyncThunk(
-  'appUsers/deleteUser',
+  'appAnggotaVerification/deleteUser',
   async (uid: number | string, { getState, dispatch }: Redux) => {
     const storedToken = window.localStorage.getItem('token')
     const dataAll = {
@@ -42,17 +42,13 @@ export const deleteUser = createAsyncThunk(
         Authorization: 'Bearer ' + storedToken
       }
     }
-    const response = await axiosConfig.post('/delete-admin', dataAll, customConfig)
-    const { role, status, q, company } = getState().admin
-
-    // Memanggil fetchData untuk memperbarui data setelah penghapusan
-    dispatch(fetchData({ role, status, q, company }))
+    const response = await axiosConfig.post('/delete-anggota', dataAll, customConfig)
 
     return response.data
   }
 )
-export const appUsersSlice = createSlice({
-  name: 'appUsers',
+export const appAnggotaVerificationSlice = createSlice({
+  name: 'appAnggotaVerification',
   initialState: {
     data: [],
     total: 1,
@@ -61,7 +57,7 @@ export const appUsersSlice = createSlice({
   },
   reducers: {},
   extraReducers: builder => {
-    builder.addCase(fetchData.fulfilled, (state, action) => {
+    builder.addCase(fetchDataVerification.fulfilled, (state, action) => {
       state.data = action.payload
       state.total = action.payload.total
       state.params = action.payload.params
@@ -70,4 +66,4 @@ export const appUsersSlice = createSlice({
   }
 })
 
-export default appUsersSlice.reducer
+export default appAnggotaVerificationSlice.reducer

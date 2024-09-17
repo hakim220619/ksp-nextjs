@@ -24,6 +24,7 @@ import withReactContent from 'sweetalert2-react-content'
 import axiosConfig from '../../../configs/axiosConfig'
 import CircularProgress from '@mui/material/CircularProgress'
 import { Box } from '@mui/system'
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 const MySwal = withReactContent(Swal)
 
 interface UserStatusType {
@@ -45,35 +46,33 @@ const userStatusObj: UserStatusType = {
 }
 
 const RowOptions = ({ uid }: { uid: any }) => {
+  const data = localStorage.getItem('userData') as string
+  const getDataLocal = JSON.parse(data)
+  const [value, setValue] = useState<string>('')
+  const [company, setCompany] = useState<any>(`${getDataLocal.company_id}`)
+
+  const [open, setOpen] = useState(false)
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
 
-  const handleRowOptionsClick = () => {}
+  const handleRowOptionsClick = () => {
+    router.push('/ms/anggota/detail/' + uid)
+  }
   const handleRowEditedClick = () => {
     router.push('/ms/anggota/' + uid)
   }
-  const handleRowOptionsClose = () => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then(result => {
-      if (result.isConfirmed) {
-        dispatch(deleteUser(uid))
-        Swal.fire({
-          title: 'Deleted!',
-          text: 'Your file has been deleted.',
-          icon: 'success'
-        })
-      }
-    })
+  const handleDialogOpen = () => {
+    setOpen(true)
   }
-  const handleDelete = () => {
-    handleRowOptionsClose()
+
+  const handleDialogClose = () => {
+    setOpen(false)
+  }
+
+  const handleDelete = async () => {
+    dispatch(deleteUser(uid))
+    await dispatch(fetchData({ company, q: value })) // Refresh data
+    handleDialogClose()
   }
 
   return (
@@ -84,16 +83,35 @@ const RowOptions = ({ uid }: { uid: any }) => {
       <IconButton size='small' color='success' onClick={handleRowEditedClick}>
         <Icon icon='tabler:edit' />
       </IconButton>
-      <IconButton size='small' color='error' onClick={handleDelete}>
+      <IconButton size='small' color='error' onClick={handleDialogOpen}>
         <Icon icon='tabler:trash' />
       </IconButton>
+      <Dialog
+        open={open}
+        onClose={handleDialogClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Are you sure you want to delete this user?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>You won't be able to revert this action!</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color='secondary'>
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color='error' autoFocus>
+            Yes, delete it!
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
 
 const columns: GridColDef[] = [
-  { flex: 0.25, minWidth: 10, field: 'no', headerName: 'NO' },
-  { flex: 0.25, minWidth: 280, field: 'nik', headerName: 'NIK' },
+  { flex: 0.25, minWidth: 70, field: 'no', headerName: 'NO' },
+  { flex: 0.25, minWidth: 200, field: 'nik', headerName: 'NIK' },
   { flex: 0.25, minWidth: 280, field: 'fullName', headerName: 'FULL NAME' },
   { flex: 0.15, field: 'email', minWidth: 260, headerName: 'EMAIL' },
   { flex: 0.15, field: 'role', minWidth: 170, headerName: 'ROLE' },
@@ -175,13 +193,21 @@ const UserList = () => {
           ) : (
             <DataGrid
               autoHeight
-              rowHeight={100}
+              rowHeight={50}
               rows={store.data}
               columns={columns}
               disableRowSelectionOnClick
               pageSizeOptions={[10, 25, 50, 100]}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
+              sx={{
+                '& .MuiDataGrid-cell': {
+                  fontSize: '0.75rem' // Mengatur ukuran font untuk sel
+                },
+                '& .MuiDataGrid-columnHeaderTitle': {
+                  fontSize: '0.75rem' // Mengatur ukuran font untuk judul kolom
+                }
+              }}
             />
           )}
         </Card>

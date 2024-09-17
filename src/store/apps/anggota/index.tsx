@@ -41,7 +41,7 @@ export const deleteUser = createAsyncThunk(
         Authorization: 'Bearer ' + storedToken
       }
     }
-    const response = await axiosConfig.post('/delete-admin', dataAll, customConfig)
+    const response = await axiosConfig.post('/delete-anggota', dataAll, customConfig)
 
     return response.data
   }

@@ -78,13 +78,13 @@ const FormValidationSchema = () => {
           }
         )
         .then(response => {
-          const { nik, email, fullName, address, phone_number, date, role, company_id, state } = response.data
+          const { nik, email, fullName, address, phone_number, date_of_birth, role, company_id, state } = response.data
           setNik(nik)
           setEmail(email)
           setFullName(fullName)
           setAddress(address)
           setPhoneNumber(phone_number)
-          setDateOfBirth(date.slice(0, 10))
+          setDateOfBirth(date_of_birth.slice(0, 10))
           setRole(role)
           setCompanyId(company_id)
           setState(state)

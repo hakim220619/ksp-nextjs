@@ -92,11 +92,9 @@ const RowOptions = ({ uid }: { uid: any }) => {
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       >
-        <DialogTitle id='alert-dialog-title'>Confirm Delete</DialogTitle>
+        <DialogTitle id='alert-dialog-title'>{'Are you sure you want to delete this user?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to delete this user? This action cannot be undone.
-          </DialogContentText>
+          <DialogContentText id='alert-dialog-description'>You won't be able to revert this action!</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color='primary'>
@@ -337,13 +335,21 @@ const UserList = () => {
           ) : (
             <DataGrid
               autoHeight
-              rowHeight={100}
+              rowHeight={50}
               rows={store.data}
               columns={columns}
               disableRowSelectionOnClick
-              pageSizeOptions={[10, 25, 50, 100]}
+              pageSizeOptions={[20, 40, 60, 100]}
               paginationModel={paginationModel}
               onPaginationModelChange={setPaginationModel}
+              sx={{
+                '& .MuiDataGrid-cell': {
+                  fontSize: '0.75rem' // Mengatur ukuran font untuk sel
+                },
+                '& .MuiDataGrid-columnHeaderTitle': {
+                  fontSize: '0.75rem' // Mengatur ukuran font untuk judul kolom
+                }
+              }}
             />
           )}
         </Card>
